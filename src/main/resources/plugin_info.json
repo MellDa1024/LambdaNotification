@@ -1,11 +1,10 @@
 {
-  "name": "ExamplePlugin",
+  "name": "LambdaNotification",
   "version": "1.0",
-  "description": "Example implementation of a plugin for Lambda.",
-  "url": "https://github.com/lambda-client/ExamplePlugin",
-  "authors": [ "me", "you" ],
-  "main_class": "com.lambda.ExamplePlugin",
+  "description": "Notification for Lambda.",
+  "url": "https://github.com/MellDa1024/LambdaNotificationModule",
+  "authors": [ "MellDa" ],
+  "main_class": "com.mellda.NotificationPlugin",
   "min_api_version": "3.0",
-  "mixins": [ "mixins.ExamplePlugin.json" ],
   "required_plugins": []
 }
