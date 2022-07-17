@@ -50,7 +50,7 @@ internal object LambdaNotification : PluginModule(
         Contain, OnlyFriend, Ignore
     }
 
-    private val whisperpattern = Pattern.compile("\\[ ([0-9a-zA-Z_]+) whispers: .*")
+    private val whisperpattern = Pattern.compile("([0-9a-zA-Z_]+) whispers: .*")
     private val playerSet = LinkedHashSet<EntityPlayer>()
     private val timer = TickTimer(TimeUnit.SECONDS)
 
