@@ -43,7 +43,7 @@ internal object LambdaNotification : PluginModule(
     private val whenName by setting("Name", true)
     private val join by setting("Joined", true)
     private val disconnect by setting("Disconnected", true)
-    private val whenJoin by setting("Someone Join", true)
+    private val whenJoin by setting("Target Player Join", true)
     private val stalkerName by setting("Player Name", "", { whenJoin })
 
     private enum class FriendMode {
@@ -82,7 +82,7 @@ internal object LambdaNotification : PluginModule(
         }
 
         safeListener<PacketEvent.Receive> {
-            if (it.packet !is SPacketPlayerListItem || !whenJoin) return@safeListener
+            if (it.packet !is SPacketPlayerListItem || !whenJoin || stalkerName.trim() == "") return@safeListener
              val playerPacket = it.packet as SPacketPlayerListItem
              if (playerPacket.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                  if (playerPacket.entries[0].profile.name == null) return@safeListener
