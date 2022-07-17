@@ -134,7 +134,7 @@ internal object LambdaNotification : PluginModule(
         listener<ClientChatReceivedEvent> {
             if (it.message.unformattedText == "Connected to the server." && join) {
                 if (!Display.isActive()) {
-                    trayicon.displayMessage("Lambda Client", "You joined to Main server.", TrayIcon.MessageType.NONE)
+                    trayicon.displayMessage("Lambda Client", "You joined into Main server.", TrayIcon.MessageType.NONE)
                 }
             }
             if (it.message.unformattedText.contains("whispers:") && whisper) {
