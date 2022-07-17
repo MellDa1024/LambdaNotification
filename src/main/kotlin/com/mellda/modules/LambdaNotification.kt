@@ -87,7 +87,7 @@ internal object LambdaNotification : PluginModule(
              if (playerPacket.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                  if (playerPacket.entries[0].profile.name == null) return@safeListener
                  if (playerPacket.entries[0].profile.name.lowercase() == stalkerName.trim().lowercase()) {
-                     trayicon.displayMessage("Lambda Client", "${playerPacket.action.name} Joined.", TrayIcon.MessageType.NONE)
+                     trayicon.displayMessage("Lambda Client", "${playerPacket.entries[0].profile.name} Joined.", TrayIcon.MessageType.NONE)
                  }
              }
         }
