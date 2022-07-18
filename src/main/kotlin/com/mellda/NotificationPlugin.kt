@@ -6,7 +6,6 @@ import com.mellda.modules.LambdaNotification
 internal object NotificationPlugin : Plugin() {
 
     override fun onLoad() {
-        // Load any modules, commands, or HUD elements here
         modules.add(LambdaNotification)
     }
 

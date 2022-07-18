@@ -1,6 +1,6 @@
 {
   "name": "LambdaNotification",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "Notification for Lambda.",
   "url": "https://github.com/MellDa1024/LambdaNotification",
   "authors": [ "MellDa" ],

@@ -117,7 +117,9 @@ internal object LambdaNotification : PluginModule(
             for (player in playerSet) {
                 if (!loadedPlayerSet.contains(player)) {
                     toRemove.add(player)
-                    if (((friendSpotted == FriendMode.OnlyFriend) && FriendManager.isFriend(player.name)) || ((friendSpotted == FriendMode.Ignore) && !FriendManager.isFriend(player.name))) {
+                    if (((friendSpotted == FriendMode.OnlyFriend) && FriendManager.isFriend(player.name))
+                        || ((friendSpotted == FriendMode.Ignore) && !FriendManager.isFriend(player.name))
+                        || (friendSpotted == FriendMode.Contain)) {
                         if (isEnabled && !Display.isActive()) trayicon.displayMessage("Lambda Client", "${player.name} leaved from Render Distance.", TrayIcon.MessageType.NONE)
                     }
                 }
