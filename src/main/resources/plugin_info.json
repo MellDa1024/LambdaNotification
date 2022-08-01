@@ -1,10 +1,10 @@
 {
   "name": "LambdaNotification",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Notification for Lambda.",
   "url": "https://github.com/MellDa1024/LambdaNotification",
   "authors": [ "MellDa" ],
   "main_class": "com.mellda.NotificationPlugin",
-  "min_api_version": "3.0",
+  "min_api_version": "3.2",
   "required_plugins": []
 }

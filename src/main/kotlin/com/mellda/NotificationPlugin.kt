@@ -8,8 +8,4 @@ internal object NotificationPlugin : Plugin() {
     override fun onLoad() {
         modules.add(LambdaNotification)
     }
-
-    override fun onUnload() {
-        // Here you can unregister threads etc...
-    }
 }

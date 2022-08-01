@@ -1,5 +1,6 @@
 package com.mellda.modules
 
+import com.lambda.client.LambdaMod
 import com.lambda.client.event.events.ConnectionEvent
 import com.lambda.client.event.events.PacketEvent
 import com.lambda.client.event.listener.listener
@@ -32,8 +33,8 @@ internal object LambdaNotification : PluginModule(
 ) {
     private lateinit var tray : SystemTray
     private lateinit var image : Image
-    private lateinit var trayicon : TrayIcon
-    private var istrayopen = false
+    private lateinit var trayIcon : TrayIcon
+    private var isTrayOpen = false
     private var playerHealth = 0F
 
     private val whisper by setting("Whsiper", true)
@@ -50,7 +51,7 @@ internal object LambdaNotification : PluginModule(
         Contain, OnlyFriend, Ignore
     }
 
-    private val whisperpattern = Pattern.compile("([0-9a-zA-Z_]+) whispers: .*")
+    private val whisperPattern = Pattern.compile("^([0-9a-zA-Z_]+) whispers: .*")
     private val playerSet = LinkedHashSet<EntityPlayer>()
     private val timer = TickTimer(TimeUnit.SECONDS)
 
@@ -63,21 +64,22 @@ internal object LambdaNotification : PluginModule(
                 } else {
                     tray = SystemTray.getSystemTray()
                     image = Toolkit.getDefaultToolkit().createImage(javaClass.getResourceAsStream("/assets/minecraft/lambda/lambda.png").readBytes())
-                    trayicon = TrayIcon(image, "Lambda Client Notification System")
-                    trayicon.isImageAutoSize = true
-                    tray.add(trayicon)
-                    istrayopen = true
+                    trayIcon = TrayIcon(image, "Lambda Client Notification System")
+                    trayIcon.isImageAutoSize = true
+                    tray.add(trayIcon)
+                    isTrayOpen = true
                 }
             } catch (e: Exception) {
-                MessageSendHelper.sendChatMessage("$chatName Toast System Not supported.")
+                LambdaMod.LOG.error("$e")
+                MessageSendHelper.sendChatMessage("$chatName The error occurred, see Minecraft Log for more info.")
                 disable()
             }
         }
 
         onDisable {
-            if (istrayopen) {
-                tray.remove(trayicon)
-                istrayopen = false
+            if (isTrayOpen) {
+                tray.remove(trayIcon)
+                isTrayOpen = false
             }
         }
 
@@ -87,14 +89,14 @@ internal object LambdaNotification : PluginModule(
              if (playerPacket.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                  if (playerPacket.entries[0].profile.name == null) return@safeListener
                  if (playerPacket.entries[0].profile.name.lowercase() == stalkerName.trim().lowercase()) {
-                     trayicon.displayMessage("Lambda Client", "${playerPacket.entries[0].profile.name} Joined.", TrayIcon.MessageType.NONE)
+                     sendNotifications("${playerPacket.entries[0].profile.name} Joined.")
                  }
              }
         }
 
         listener<ConnectionEvent.Disconnect> {
-            if (!Display.isActive() && disconnect) {
-                trayicon.displayMessage("Lambda Client", "You've been Disconnected from server.", TrayIcon.MessageType.NONE)
+            if (disconnect) {
+                sendNotifications("You've been Disconnected from server.")
             }
         }
 
@@ -108,8 +110,8 @@ internal object LambdaNotification : PluginModule(
                 if ((friendSpotted == FriendMode.Ignore) && FriendManager.isFriend(entityPlayer.name)) continue
                 if ((friendSpotted == FriendMode.OnlyFriend) && !FriendManager.isFriend(entityPlayer.name)) continue
 
-                if (playerSet.add(entityPlayer) && isEnabled && !Display.isActive()) {
-                    trayicon.displayMessage("Lambda Client", "${entityPlayer.name} came into Render Distance.", TrayIcon.MessageType.NONE)
+                if (playerSet.add(entityPlayer) && isEnabled) {
+                    sendNotifications("${entityPlayer.name} came into Render Distance.")
                 }
             }
 
@@ -120,7 +122,7 @@ internal object LambdaNotification : PluginModule(
                     if (((friendSpotted == FriendMode.OnlyFriend) && FriendManager.isFriend(player.name))
                         || ((friendSpotted == FriendMode.Ignore) && !FriendManager.isFriend(player.name))
                         || (friendSpotted == FriendMode.Contain)) {
-                        if (isEnabled && !Display.isActive()) trayicon.displayMessage("Lambda Client", "${player.name} leaved from Render Distance.", TrayIcon.MessageType.NONE)
+                        if (isEnabled) sendNotifications("${player.name} leaved from Render Distance.")
                     }
                 }
             }
@@ -129,38 +131,40 @@ internal object LambdaNotification : PluginModule(
 
         safeListener<TickEvent.ClientTickEvent> {
             if (isDisabled || it.phase != TickEvent.Phase.END) return@safeListener
-            if (playerHealth > player.scaledHealth && !Display.isActive() && damage) {
-                trayicon.displayMessage("Lambda Client", "You've got damaged, HP : ${player.scaledHealth}", TrayIcon.MessageType.NONE)
+            if (playerHealth > player.scaledHealth && damage) {
+                sendNotifications("You've got damaged, HP : ${player.scaledHealth}")
             }
             playerHealth = player.scaledHealth
         }
 
         listener<ClientChatReceivedEvent> {
             if (it.message.unformattedText == "Connected to the server." && join) {
-                if (!Display.isActive()) {
-                    trayicon.displayMessage("Lambda Client", "You joined into Main server.", TrayIcon.MessageType.NONE)
-                }
+                sendNotifications("You joined into Main server.")
             }
             if (it.message.unformattedText.contains("whispers:") && whisper) {
-                val whispermessage = whisperpattern.matcher(removecolorcode(it.message.unformattedText))
-                if (whispermessage.find() && !Display.isActive()) {
-                    trayicon.displayMessage("Lambda Client", "Whisper Detected, Sender : ${whispermessage.group(1)}", TrayIcon.MessageType.NONE)
+                val whispermessage = whisperPattern.matcher(removeColorCode(it.message.unformattedText))
+                if (whispermessage.find()) {
+                    sendNotifications("Whisper Detected, Sender : ${whispermessage.group(1)}")
                     return@listener
                 }
             }
             if (it.message.unformattedText.contains(mc.session.username) && whenName) {
-                if (!Display.isActive()) {
-                    trayicon.displayMessage("Lambda Client", "Someone called your name.", TrayIcon.MessageType.NONE)
-                }
+                sendNotifications("Someone called your name.")
             }
         }
     }
-    private fun removecolorcode(message: String): String {
+    private fun removeColorCode(message: String): String {
         val colorcode = arrayOf("§0","§1","§2","§3","§4","§5","§6","§7","§8","§9","§a","§b","§c","§d","§e","§f","§k","§l","§m","§n","§o","§r")
         var temp = message
         for (i in colorcode) {
             temp = temp.replace(i,"")
         }
         return temp
+    }
+
+    private fun sendNotifications(message: String) {
+        if (!Display.isActive()) {
+            trayIcon.displayMessage("Lambda Client", message, TrayIcon.MessageType.NONE)
+        }
     }
 }
